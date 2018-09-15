@@ -1,85 +1,69 @@
-window.router = (function(win, doc) {
+window.router = ((win, doc) => {
     if ("onhashchange" in window) {
-        var _configRouter = {
+        let configRouter = {
             supportTemplate: false,
             route: []
         };
-        var _errors = {
+        const errors = {
             notSupportTemplates: "NO TIENES SOPORTE PARA TEMPLATE, USA HTML DIRECTAMENTE EN LA PROPIEDAD 'VIEW'",
             notPathConfigure: "COMPRUEBA QUE ESTÁ DEFINIA LA RUTA Y/O LA PROPIEDAD 'PATH' DENTRO DE LA CONFIGURACIÓN DE RUTAS"
         };
-        var _info = {
+        const info = {
             loadTemplate: "CARGANDO TEMPLATE",
             loadHTML: "CARGANDO HTML",
             routerOK: "DEFINIDO ROUTER DENTRO DE WINDOW"
         };
-
-        var _setSupportTemplate = function(estado) {
-            _configRouter.supportTemplate = estado;
+        let setSupportTemplate = estado => configRouter.supportTemplate = estado;
+        let loadView = () => doc.querySelector("data-route-view");
+        let renderTemplate = (template, dest) => {
+            let clone = doc.importNode(doc.querySelector(template).content, true);
+            dest.appendChild(clone);
         };
-        var _loadView = function() {
-            return doc.querySelector("data-route-view");
-        };
-        var _renderTemplate = function(template, dest) {
-            var _template = doc.querySelector(template);
-            var _clone = doc.importNode(_template.content, true);
-            dest.appendChild(_clone);
-        };
-
-        var _render = function(type, destino, contenido) {
+        let render = (type, destino, contenido) => {
             if (type.toUpperCase() === "TEMPLATE") {
-                console.log(_info.loadTemplate);
-                _cleanRouterView();
-                _renderTemplate(destino, contenido);
+                cleanRouterView();
+                renderTemplate(destino, contenido);
             }
             if (type.toUpperCase() === "HTML") {
-                console.log(_info.loadHTML);
-                _cleanRouterView();
+                cleanRouterView();
                 contenido.innerHTML = destino;
             }
         };
-
-        var _cleanRouterView = function() {
-            doc.querySelector("data-route-view").innerHTML = "";
-        };
-
-        var init = function(rutas) {
-            debugger;
-            _configRouter.route = rutas;
-            win.addEventListener("hashchange", function() {
-                debugger;
-                var _notDefinedPath = true;
-                for (_index in _configRouter.route) {
-                    if (location.hash.replace("#", "/") === _configRouter.route[_index].path) {
+        let cleanRouterView = () => doc.querySelector("data-route-view").innerHTML = "";
+        let init = (rutas) => {
+            configRouter.route = rutas;
+            win.addEventListener("hashchange", () => {
+                let _notDefinedPath = true;
+                for (_index in configRouter.route) {
+                    if (location.hash.replace("#", "/") === configRouter.route[_index].path) {
                         _notDefinedPath = true;
-                        var _view = _loadView();
-                        if (_configRouter.route[_index].view.indexOf("#") >= 0) {
-                            if (!_configRouter.supportTemplate) {
-                                console.log(_errors.notSupportTemplates);
+                        let _view = loadView();
+                        if (configRouter.route[_index].view.indexOf("#") >= 0) {
+                            if (!configRouter.supportTemplate) {
+                                console.log(errors.notSupportTemplates);
                                 return false;
                             }
-                            _render("TEMPLATE", _configRouter.route[_index].view, _view);
+                            render("TEMPLATE", configRouter.route[_index].view, _view);
                         } else {
-                            _render("HTML", _configRouter.route[_index].view, _view);
+                            render("HTML", configRouter.route[_index].view, _view);
                         }
                         return false;
                     }
                 }
                 if (!_notDefinedPath) {
-                    console.log(_errors.notPathConfigure);
+                    console.log(errors.notPathConfigure);
                 }
             });
-            console.log(_info.routerOK);
+            console.log(info.routerOK);
         };
         return {
-            init: function(rutas) {
-                debugger;
+            init: function (rutas) {
                 if ('content' in document.createElement('template')) {
                     console.log("TIENES SOPORTE PARA TEMPLATE");
-                    _setSupportTemplate(true);
+                    setSupportTemplate(true);
                 } else {
                     console.log("NO TIENES SOPORTE PARA TEMPLATE");
-                    _setSupportTemplate(false);
+                    setSupportTemplate(false);
                 }
                 init(rutas);
             }
